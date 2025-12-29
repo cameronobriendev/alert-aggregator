@@ -34,7 +34,7 @@ const handler = NextAuth({
     },
   },
   pages: {
-    signIn: '/',
+    signIn: 'https://clientflow.dev',
   },
   secret: process.env.NEXTAUTH_SECRET,
 })

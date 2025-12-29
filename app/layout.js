@@ -3,7 +3,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import SessionProvider from "@/components/SessionProvider";
 
 export const metadata = {
-  title: "Alert Aggregator | No-Code Usage Monitoring",
+  title: "ClientFlow | No-Code Usage Monitoring",
   description: "Monitor your no-code platform usage across Zapier, Make.com, Airtable, and Bubble. Predict overages before they happen.",
 };
 

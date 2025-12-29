@@ -17,7 +17,7 @@ export default function Home() {
   }
 
   const handleSignIn = () => {
-    signIn('google', { callbackUrl: '/dashboard' })
+    signIn('google', { callbackUrl: 'https://app.clientflow.dev/dashboard' })
   }
   return (
     <div className="min-h-screen bg-aa-bg">
@@ -26,7 +26,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon name="notifications" size={28} className="text-aa-primary" />
-            <span className="text-xl font-semibold text-aa-text">Alert Aggregator</span>
+            <span className="text-xl font-semibold text-aa-text">ClientFlow</span>
             <span className="text-xs bg-aa-warning/20 text-aa-warning px-2 py-0.5 rounded-full font-medium">BETA</span>
           </div>
           <div className="flex items-center gap-4">
