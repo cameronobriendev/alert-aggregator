@@ -53,6 +53,109 @@ const DEMO_DATA = {
     { id: 7, platform: 'make', threshold: 50, emailDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString() },
     { id: 8, platform: 'zapier', threshold: 50, emailDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString() },
   ],
+  // Error notifications from platforms
+  errors: [
+    {
+      id: 1,
+      platform: 'zapier',
+      errorType: 'zap_error',
+      itemName: 'New Lead to CRM',
+      errorMessage: 'Connection to HubSpot failed: API rate limit exceeded',
+      errorCount: 12,
+      emailDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 2,
+      platform: 'airtable',
+      errorType: 'automation_failure',
+      itemName: 'Send Weekly Report',
+      errorMessage: 'Automation failed 8 times this week',
+      errorCount: 8,
+      emailDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 3,
+      platform: 'make',
+      errorType: 'scenario_failure',
+      itemName: 'Order Processing',
+      errorMessage: 'Scenario execution timeout after 40 seconds',
+      errorCount: 5,
+      emailDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 4,
+      platform: 'bubble',
+      errorType: 'capacity_exceeded',
+      itemName: 'Customer Portal',
+      errorMessage: 'App hit maximum capacity for 47 minutes',
+      capacityMinutes: 47,
+      emailDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+  ],
+}
+
+// Custom build recommendations based on error patterns
+const CUSTOM_BUILD_OFFERS = {
+  zapier: {
+    problem: 'Zapier tasks are burning through limits and hitting API errors',
+    risks: [
+      'Overage charges of $0.01-0.05 per extra task add up fast',
+      'Task-based pricing punishes business growth',
+      'API rate limits cause cascading failures',
+    ],
+    solution: 'Self-hosted n8n gives you unlimited workflow executions for a flat $5-10/mo server cost.',
+    benefits: [
+      'Unlimited executions (no task limits)',
+      'Same visual workflow builder',
+      'Full error handling and logging',
+      'One-time setup, forever savings',
+    ],
+  },
+  airtable: {
+    problem: 'Airtable automations keep failing and API limits are blocking workflows',
+    risks: [
+      'API rate limits (5 req/sec) cause cascading delays',
+      'Automation failures happen silently',
+      'No visibility into what\'s causing failures',
+    ],
+    solution: 'A PostgreSQL database with custom automations has no rate limits and instant execution.',
+    benefits: [
+      'No API rate limits',
+      'Real-time data access',
+      'Full error visibility and logging',
+      'Direct database connections',
+    ],
+  },
+  make: {
+    problem: 'Make.com scenarios are timing out and eating through operations',
+    risks: [
+      'Slow scenarios consume more operations (costs more)',
+      'Timeouts cause partial data processing',
+      'No visibility into which module is slow',
+    ],
+    solution: 'A Node.js script processes the same data in milliseconds with full performance profiling.',
+    benefits: [
+      'Sub-second processing times',
+      'Built-in performance profiling',
+      'Parallel processing support',
+      'Full debugging and logging',
+    ],
+  },
+  bubble: {
+    problem: 'Bubble app is hitting capacity limits and slowing down for users',
+    risks: [
+      'Shared infrastructure means unpredictable performance',
+      'No control over server resources or scaling',
+      '2+ second loads cause 50%+ user abandonment',
+    ],
+    solution: 'A Next.js app on Vercel delivers sub-500ms loads globally with edge deployment.',
+    benefits: [
+      'Sub-500ms global load times',
+      'Automatic edge caching',
+      'Full performance control',
+      'Scales automatically under load',
+    ],
+  },
 }
 
 const PLATFORMS = [
@@ -136,7 +239,7 @@ export default function DemoPage() {
             <div>
               <h1 className="text-2xl font-bold text-aa-text">Platform Status</h1>
               <p className="text-sm text-aa-muted mt-1">
-                Sample data from a typical no-code agency
+                Sample data showing what ClientFlow tracks
               </p>
             </div>
             <div className="flex items-center gap-2 text-aa-muted text-sm">
@@ -232,11 +335,122 @@ export default function DemoPage() {
             </div>
           </div>
 
+          {/* Automation Errors */}
+          <div className="glass-card rounded-xl p-6 mt-6 border-l-4 border-aa-critical">
+            <h3 className="text-lg font-medium text-aa-text mb-4 flex items-center gap-2">
+              <Icon name="error" size={24} className="text-aa-critical" />
+              Automation Errors ({data.errors.length} recent)
+            </h3>
+            <div className="space-y-4">
+              {data.errors.map((error) => {
+                const platformInfo = PLATFORMS.find(p => p.id === error.platform)
+                return (
+                  <div key={error.id} className="p-4 bg-aa-critical/5 rounded-lg border border-aa-critical/20">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <span className="text-sm font-medium text-aa-text capitalize">{platformInfo?.name}</span>
+                        {error.itemName && (
+                          <span className="text-sm text-aa-muted ml-2">
+                            {error.itemName}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-aa-muted">{formatDate(error.emailDate)}</span>
+                    </div>
+                    <p className="text-sm text-aa-critical">{error.errorMessage}</p>
+                    {error.errorCount > 3 && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <Icon name="warning" size={14} className="text-aa-warning" />
+                        <span className="text-xs text-aa-warning">
+                          Recurring issue - failed {error.errorCount} times
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Custom Build Recommendations */}
+          <div className="mt-8">
+            <h2 className="text-xl font-bold text-aa-text mb-2 flex items-center gap-2">
+              <Icon name="build" size={24} className="text-aa-accent" />
+              Outgrowing No-Code?
+            </h2>
+            <p className="text-aa-muted mb-6">
+              Based on your error patterns, here's what custom automation could do for you.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {data.errors.slice(0, 2).map((error) => {
+                const offer = CUSTOM_BUILD_OFFERS[error.platform]
+                const platformInfo = PLATFORMS.find(p => p.id === error.platform)
+                if (!offer) return null
+
+                return (
+                  <motion.div
+                    key={error.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="glass-card rounded-xl p-6 border-t-4 border-aa-accent"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-sm font-medium text-aa-primary px-2 py-0.5 bg-aa-primary/10 rounded">
+                        {platformInfo?.name}
+                      </span>
+                      {error.itemName && (
+                        <span className="text-sm text-aa-muted">{error.itemName}</span>
+                      )}
+                    </div>
+
+                    <h4 className="font-medium text-aa-text mb-3">{offer.problem}</h4>
+
+                    <div className="mb-4">
+                      <p className="text-xs text-aa-critical font-medium mb-2">The risks:</p>
+                      <ul className="space-y-1">
+                        {offer.risks.map((risk, i) => (
+                          <li key={i} className="text-xs text-aa-muted flex items-start gap-2">
+                            <Icon name="close" size={12} className="text-aa-critical mt-0.5 flex-shrink-0" />
+                            {risk}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="p-3 bg-aa-healthy/10 rounded-lg border border-aa-healthy/20 mb-4">
+                      <p className="text-sm text-aa-healthy font-medium mb-2">The solution:</p>
+                      <p className="text-sm text-aa-text">{offer.solution}</p>
+                    </div>
+
+                    <ul className="space-y-1 mb-4">
+                      {offer.benefits.map((benefit, i) => (
+                        <li key={i} className="text-xs text-aa-muted flex items-start gap-2">
+                          <Icon name="check" size={12} className="text-aa-healthy mt-0.5 flex-shrink-0" />
+                          {benefit}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <a
+                      href="https://cal.cameronobrien.dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center bg-aa-accent text-white py-2 px-4 rounded-lg font-medium hover:bg-aa-accent/90 transition-colors text-sm"
+                    >
+                      Get a Custom Build Quote
+                    </a>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Recent alerts timeline */}
           <div className="glass-card rounded-xl p-6 mt-6">
             <h3 className="text-lg font-medium text-aa-text mb-4 flex items-center gap-2">
               <Icon name="history" size={24} className="text-aa-primary" />
-              Recent Alerts ({data.alerts.length} total)
+              Recent Usage Alerts ({data.alerts.length} total)
             </h3>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {data.alerts.map((alert) => (
