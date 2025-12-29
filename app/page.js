@@ -66,7 +66,10 @@ export default function Home() {
               <Icon name="email" size={20} />
               Connect Gmail
             </button>
-            <button className="bg-aa-card border border-aa-border text-aa-text px-6 py-3 rounded-lg font-medium hover:bg-aa-border/30 transition-colors">
+            <button
+              onClick={() => router.push('/demo')}
+              className="bg-aa-card border border-aa-border text-aa-text px-6 py-3 rounded-lg font-medium hover:bg-aa-border/30 transition-colors"
+            >
               See Demo
             </button>
           </div>
