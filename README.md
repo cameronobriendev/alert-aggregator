@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ClientFlow
 
-## Getting Started
+Monitor your no-code platform usage across Zapier, Make.com, Airtable, and Bubble. Predict overages before they happen.
 
-First, run the development server:
+## Features
+
+- **Gmail Integration** - Connect your Gmail to scan for usage alert emails
+- **Multi-Platform Support** - Parses alerts from Zapier, Make.com, Airtable, and Bubble
+- **Predictive Analytics** - Velocity-based prediction of when you'll hit limits
+- **Adaptive Refresh** - Learns your login patterns and refreshes data before you arrive
+- **Dark/Light Theme** - Full theme support
+
+## Tech Stack
+
+- Next.js 15 (App Router)
+- NextAuth.js (Google OAuth)
+- Neon PostgreSQL
+- Tailwind CSS v4
+- Framer Motion
+- Vercel Cron
+
+## Setup
+
+### 1. Clone and Install
+
+```bash
+git clone https://github.com/cameronobriendev/alert-aggregator.git
+cd alert-aggregator
+npm install
+```
+
+### 2. Database Setup
+
+Create a Neon database and run the schema:
+
+```bash
+psql $DATABASE_URL -f schema.sql
+```
+
+### 3. Google OAuth Setup
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Create a project and enable Gmail API
+3. Configure OAuth consent screen (External, add `gmail.readonly` scope)
+4. Create OAuth 2.0 credentials (Web application)
+5. Add redirect URIs:
+   - `https://clientflow.dev/api/auth/callback/google`
+   - `https://app.clientflow.dev/api/auth/callback/google`
+   - `http://localhost:3000/api/auth/callback/google` (for local dev)
+
+### 4. Environment Variables
+
+Create `.env.local`:
+
+```env
+DATABASE_URL=postgresql://...@neon.tech/neondb?sslmode=require
+
+NEXTAUTH_URL=https://clientflow.dev
+NEXTAUTH_SECRET=your-secret-here
+
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+
+CRON_SECRET=your-cron-secret
+```
+
+### 5. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Architecture
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```
+clientflow.dev          → Landing page (sign in)
+app.clientflow.dev      → Dashboard (post-login)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+/api/auth/[...nextauth] → Google OAuth
+/api/scan               → Trigger email scan
+/api/alerts             → Get user's alerts & predictions
+/api/cron/scan          → Hourly background scan (Vercel Cron)
+```
 
-## Learn More
+## Email Parsing
 
-To learn more about Next.js, take a look at the following resources:
+Parses usage alerts from:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Platform | Sender | Thresholds |
+|----------|--------|------------|
+| Zapier | contact@zapier.com | 80%, 100% |
+| Make.com | *@make.com | 75%, 90%, 100% |
+| Airtable | noreply@airtable.com | 80%, 90%, 100% |
+| Bubble | via SendGrid | 75%, 100% |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Prediction Algorithm
 
-## Deploy on Vercel
+Uses velocity-based analysis:
+1. Calculate usage velocity from consecutive alerts (% per day)
+2. Project days until 100% based on average velocity
+3. Confidence rating based on data points (low/medium/high)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
