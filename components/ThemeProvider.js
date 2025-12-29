@@ -16,8 +16,15 @@ export function ThemeProvider({ children }) {
     const saved = localStorage.getItem('alert-aggregator-theme')
     if (saved) {
       setTheme(saved)
+      document.documentElement.setAttribute('data-theme', saved)
     }
   }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+  }, [theme, mounted])
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
@@ -28,7 +35,7 @@ export function ThemeProvider({ children }) {
   // Prevent flash of wrong theme
   if (!mounted) {
     return (
-      <div data-theme="light" className="min-h-screen">
+      <div className="min-h-screen">
         {children}
       </div>
     )
@@ -36,7 +43,7 @@ export function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div data-theme={theme} className="min-h-screen transition-colors duration-300">
+      <div className="min-h-screen transition-colors duration-300">
         {children}
       </div>
     </ThemeContext.Provider>

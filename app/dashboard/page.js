@@ -133,7 +133,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <img src="/logo.svg" alt="ClientFlow" className="h-8 w-auto" />
             <span className="text-xl font-semibold text-aa-text">ClientFlow</span>
-            <span className="text-xs bg-aa-warning/20 text-aa-warning px-2 py-0.5 rounded-full font-medium">BETA</span>
+            <span className="text-xs bg-aa-primary/20 text-aa-primary px-2 py-0.5 rounded-full font-medium">FREE BETA</span>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -377,6 +377,23 @@ export default function Dashboard() {
 
       {/* Beta feedback toast */}
       <BetaToast type="welcome" />
+
+      {/* Footer */}
+      <footer className="border-t border-aa-border py-8 mt-16">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-aa-muted">
+            © {new Date().getFullYear()} ClientFlow. All rights reserved.
+          </div>
+          <div className="flex items-center gap-6 text-sm">
+            <a href="/privacy" className="text-aa-muted hover:text-aa-text transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/terms" className="text-aa-muted hover:text-aa-text transition-colors">
+              Terms of Service
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
