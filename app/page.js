@@ -24,8 +24,8 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-aa-border">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Icon name="notifications" size={28} className="text-aa-primary" />
+          <div className="flex items-center gap-3">
+            <img src="/logo.svg" alt="ClientFlow" className="h-8 w-auto" />
             <span className="text-xl font-semibold text-aa-text">ClientFlow</span>
             <span className="text-xs bg-aa-warning/20 text-aa-warning px-2 py-0.5 rounded-full font-medium">BETA</span>
           </div>

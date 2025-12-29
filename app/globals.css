@@ -15,8 +15,9 @@
   --color-aa-warning: #f59e0b;
   --color-aa-critical: #ef4444;
 
-  /* Accent */
-  --color-aa-primary: #3b82f6;
+  /* Accent - ClientFlow purple */
+  --color-aa-primary: #812DFF;
+  --color-aa-accent: #FFBA60;
 }
 
 /* Theme CSS Variables */
