@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createGmailClient } from '@/lib/gmail'
-import { parseEmails, groupByPlatform } from '@/lib/parsers'
+import { parseEmailsWithAI } from '@/lib/ai-parser'
 import { predictAllPlatforms } from '@/lib/prediction'
 import {
   getOrCreateUser,
@@ -42,11 +42,20 @@ export async function POST(request) {
       console.log(`[SCAN] Email ${i}: from="${e.from}", subject="${e.subject?.substring(0, 50)}"`)
     })
 
-    // Parse emails into alerts
-    const parsedAlerts = parseEmails(emails)
-    console.log(`[SCAN] Parsed ${parsedAlerts.length} alerts from ${emails.length} emails`)
+    // Parse emails using AI-maintained pattern system
+    console.log(`[SCAN] Starting AI pattern parsing...`)
+    const parsedAlerts = await parseEmailsWithAI(emails)
+    console.log(`[SCAN] AI parsed ${parsedAlerts.length} alerts from ${emails.length} emails`)
 
-    // Save alerts to database (both usage AND error alerts)
+    // Count pattern matches vs new patterns created
+    const patternStats = {
+      matched: parsedAlerts.filter(a => a.patternMatched).length,
+      created: parsedAlerts.filter(a => a.patternCreated).length,
+      unknown: parsedAlerts.filter(a => a.category === 'unknown').length,
+    }
+    console.log(`[SCAN] Pattern stats: ${patternStats.matched} matched, ${patternStats.created} new, ${patternStats.unknown} unknown`)
+
+    // Save alerts to database
     const savedAlerts = []
     for (const alert of parsedAlerts) {
       try {
@@ -54,20 +63,24 @@ export async function POST(request) {
           userId: user.id,
           platform: alert.platform,
           type: alert.type || 'usage',
-          threshold: alert.threshold,
-          alertType: alert.alertType,
-          errorType: alert.errorType,
-          severity: alert.severity,
-          itemName: alert.itemName,
-          errorMessage: alert.errorMessage,
+          threshold: alert.threshold || null,
+          alertType: alert.alertType || null,
+          errorType: alert.errorType || null,
+          severity: alert.severity || null,
+          itemName: alert.itemName || null,
+          errorMessage: alert.errorMessage || null,
           emailDate: alert.emailDate,
           emailSubject: alert.emailSubject,
-          usageCurrent: alert.usageCurrent,
-          usageLimit: alert.usageLimit,
-          planName: alert.planName,
-          billingCycleStart: alert.billingCycleStart,
-          billingCycleEnd: alert.billingCycleEnd,
+          usageCurrent: alert.usageCurrent || null,
+          usageLimit: alert.usageLimit || null,
+          planName: alert.planName || null,
+          billingCycleStart: alert.billingCycleStart || null,
+          billingCycleEnd: alert.billingCycleEnd || null,
           rawEmailId: alert.rawEmailId,
+          // New AI-extracted fields
+          summary: alert.summary || null,
+          category: alert.category || null,
+          subcategory: alert.subcategory || null,
         })
         if (saved) savedAlerts.push(saved)
       } catch (err) {
@@ -75,8 +88,15 @@ export async function POST(request) {
       }
     }
 
-    // Group alerts by platform and generate predictions
-    const alertsByPlatform = groupByPlatform(parsedAlerts)
+    // Group alerts by platform for predictions
+    const alertsByPlatform = {}
+    for (const alert of parsedAlerts) {
+      if (!alertsByPlatform[alert.platform]) {
+        alertsByPlatform[alert.platform] = []
+      }
+      alertsByPlatform[alert.platform].push(alert)
+    }
+
     const predictions = predictAllPlatforms(alertsByPlatform)
 
     // Save predictions to database
@@ -101,6 +121,7 @@ export async function POST(request) {
       emailsScanned: emails.length,
       alertsFound: parsedAlerts.length,
       alertsSaved: savedAlerts.length,
+      patternStats,
       predictions,
       // Debug info
       debug: {
@@ -108,7 +129,13 @@ export async function POST(request) {
           from: e.from,
           subject: e.subject?.substring(0, 60),
         })),
-        parsedPlatforms: parsedAlerts.map(a => a.platform),
+        parsedAlerts: parsedAlerts.slice(0, 5).map(a => ({
+          platform: a.platform,
+          category: a.category,
+          summary: a.summary,
+          patternMatched: a.patternMatched || false,
+          patternCreated: a.patternCreated || false,
+        })),
       }
     })
   } catch (error) {

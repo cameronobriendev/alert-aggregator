@@ -366,15 +366,42 @@ export default function Dashboard() {
                   <Icon name="history" size={24} className="text-aa-primary" />
                   Recent Alerts ({data.alerts.length} total)
                 </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {data.alerts.slice(0, 10).map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between py-2 border-b border-aa-border last:border-0">
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium text-aa-text capitalize">{alert.platform}</span>
-                        <span className="text-xs bg-aa-border px-2 py-0.5 rounded">{alert.threshold}%</span>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {data.alerts.slice(0, 20).map((alert) => (
+                    <div key={alert.id} className="flex items-center justify-between py-3 border-b border-aa-border last:border-0">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {/* Severity indicator */}
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          alert.severity === 'critical' ? 'bg-aa-critical' :
+                          alert.severity === 'warning' ? 'bg-aa-warning' :
+                          'bg-aa-healthy'
+                        }`} />
+                        {/* Platform badge */}
+                        <span className="text-xs font-medium bg-aa-border px-2 py-0.5 rounded capitalize flex-shrink-0">
+                          {alert.platform}
+                        </span>
+                        {/* Summary or fallback */}
+                        <span className="text-sm text-aa-text truncate">
+                          {alert.summary || (
+                            alert.threshold
+                              ? `${alert.threshold}% usage`
+                              : alert.emailSubject?.substring(0, 50) || 'Alert'
+                          )}
+                        </span>
+                        {/* Category badge */}
+                        {alert.category && alert.category !== 'unknown' && (
+                          <span className={`text-xs px-2 py-0.5 rounded flex-shrink-0 ${
+                            alert.category === 'error' ? 'bg-aa-critical/20 text-aa-critical' :
+                            alert.category === 'warning' ? 'bg-aa-warning/20 text-aa-warning' :
+                            alert.category === 'usage_alert' ? 'bg-aa-primary/20 text-aa-primary' :
+                            'bg-aa-border text-aa-muted'
+                          }`}>
+                            {alert.category.replace('_', ' ')}
+                          </span>
+                        )}
                       </div>
-                      <div className="text-xs text-aa-muted">
-                        {formatDate(alert.emailDate)}
+                      <div className="text-xs text-aa-muted flex-shrink-0 ml-4">
+                        {formatDate(alert.email_date || alert.emailDate)}
                       </div>
                     </div>
                   ))}
