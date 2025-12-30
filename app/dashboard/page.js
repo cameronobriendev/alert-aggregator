@@ -140,6 +140,12 @@ export default function Dashboard() {
             <span className="text-xs bg-aa-primary/20 text-aa-primary px-2 py-0.5 rounded-full font-medium">FREE BETA</span>
           </div>
           <div className="flex items-center gap-4">
+            <a
+              href="/help"
+              className="text-aa-muted hover:text-aa-text transition-colors font-medium"
+            >
+              Help
+            </a>
             <ThemeToggle />
             <div className="flex items-center gap-3">
               <img
