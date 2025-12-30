@@ -13,7 +13,7 @@ async function notifyPumble(email) {
       },
       body: JSON.stringify({
         channel: 'clientflow-app',
-        text: `New ClientFlow signup: ${email}`,
+        text: `Google signup: ${email}`,
       }),
     })
   } catch (err) {

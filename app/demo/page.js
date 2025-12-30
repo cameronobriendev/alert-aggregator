@@ -194,13 +194,34 @@ const PLATFORMS = [
   { id: 'bubble', name: 'Bubble', metric: 'workload units' },
 ]
 
-function getStatusColor(prediction) {
-  if (!prediction) return 'aa-muted'
+function getStatusClasses(prediction) {
+  if (!prediction) {
+    return {
+      bg: 'bg-aa-muted',
+      bgLight: 'bg-aa-muted/20',
+      text: 'text-aa-muted',
+    }
+  }
   const days = prediction.daysUntilOverage
-  if (days <= 0) return 'aa-critical'
-  if (days <= 7) return 'aa-critical'
-  if (days <= 14) return 'aa-warning'
-  return 'aa-healthy'
+  if (days <= 7) {
+    return {
+      bg: 'bg-aa-critical',
+      bgLight: 'bg-aa-critical/20',
+      text: 'text-aa-critical',
+    }
+  }
+  if (days <= 14) {
+    return {
+      bg: 'bg-aa-warning',
+      bgLight: 'bg-aa-warning/20',
+      text: 'text-aa-warning',
+    }
+  }
+  return {
+    bg: 'bg-aa-healthy',
+    bgLight: 'bg-aa-healthy/20',
+    text: 'text-aa-healthy',
+  }
 }
 
 function getStatusLabel(prediction) {
@@ -231,7 +252,7 @@ export default function DemoPage() {
       <div className="bg-aa-primary text-white py-2 px-4 text-center text-sm">
         <span className="font-medium">Demo Mode</span> - This is sample data showing what ClientFlow looks like in action.{' '}
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/signup')}
           className="underline hover:no-underline font-medium"
         >
           Sign up free to connect your Gmail
@@ -251,7 +272,7 @@ export default function DemoPage() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/signup')}
               className="bg-aa-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-aa-primary/90 transition-colors flex items-center gap-2"
             >
               <Icon name="login" size={20} />
@@ -283,7 +304,7 @@ export default function DemoPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {PLATFORMS.map((platform) => {
               const prediction = data.predictions[platform.id]
-              const statusColor = getStatusColor(prediction)
+              const statusClasses = getStatusClasses(prediction)
               const statusLabel = getStatusLabel(prediction)
 
               return (
@@ -295,7 +316,7 @@ export default function DemoPage() {
                 >
                   <div className="flex items-center justify-between mb-4">
                     <span className="font-medium text-aa-text">{platform.name}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium bg-${statusColor}/20 text-${statusColor}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusClasses.bgLight} ${statusClasses.text}`}>
                       {statusLabel}
                     </span>
                   </div>
@@ -304,7 +325,7 @@ export default function DemoPage() {
                     {/* Progress bar */}
                     <div className="h-2 bg-aa-border rounded-full overflow-hidden">
                       <div
-                        className={`h-full bg-${statusColor} progress-animate`}
+                        className={`h-full ${statusClasses.bg} progress-animate`}
                         style={{ width: `${Math.min(prediction.lastThreshold || 50, 100)}%` }}
                       />
                     </div>
@@ -312,7 +333,7 @@ export default function DemoPage() {
                     {/* Prediction */}
                     <div className="text-sm">
                       <span className="text-aa-muted">Limit in </span>
-                      <span className={`font-medium text-${statusColor}`}>
+                      <span className={`font-medium ${statusClasses.text}`}>
                         {prediction.daysUntilOverage} days
                       </span>
                     </div>
@@ -345,11 +366,11 @@ export default function DemoPage() {
                 .sort((a, b) => new Date(a[1].predictedOverageDate) - new Date(b[1].predictedOverageDate))
                 .map(([platform, prediction]) => {
                   const platformInfo = PLATFORMS.find(p => p.id === platform)
-                  const statusColor = getStatusColor(prediction)
+                  const statusClasses = getStatusClasses(prediction)
                   return (
                     <div key={platform} className="flex items-center justify-between py-2 border-b border-aa-border last:border-0">
                       <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full bg-${statusColor}`} />
+                        <div className={`w-3 h-3 rounded-full ${statusClasses.bg}`} />
                         <span className="text-aa-text font-medium">{platformInfo?.name}</span>
                       </div>
                       <div className="text-right">
@@ -518,7 +539,7 @@ export default function DemoPage() {
                 Free during beta.
               </p>
               <button
-                onClick={() => router.push('/')}
+                onClick={() => router.push('/signup')}
                 className="bg-aa-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-2 mx-auto"
               >
                 <Icon name="email" size={20} />
