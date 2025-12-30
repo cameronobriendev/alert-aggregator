@@ -41,7 +41,8 @@ function SignupContent() {
           </div>
 
           <h1 className="text-3xl md:text-4xl font-bold text-aa-text mb-4">
-            Use Gmail? Google Workspace?
+            Use Gmail?<br />
+            Google Workspace?
           </h1>
 
           <p className="text-2xl font-semibold text-aa-primary mb-4">
@@ -49,7 +50,8 @@ function SignupContent() {
           </p>
 
           <p className="text-lg text-aa-muted mb-8">
-            Sign in with Google and Cameron will set up your account within 24 hours.
+            Cameron will set up your account within 24 hours.<br />
+            Likely sooner. He ships fast.
           </p>
 
           {success ? (
