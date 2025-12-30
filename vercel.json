@@ -4,5 +4,16 @@
       "path": "/api/cron/scan",
       "schedule": "55 * * * *"
     }
-  ]
+  ],
+  "functions": {
+    "app/api/scan/route.js": {
+      "maxDuration": 300
+    },
+    "app/api/scan/background/route.js": {
+      "maxDuration": 300
+    },
+    "app/api/cron/scan/route.js": {
+      "maxDuration": 300
+    }
+  }
 }
