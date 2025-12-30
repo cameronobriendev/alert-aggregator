@@ -138,8 +138,8 @@ export default function Home() {
             {status === 'success' ? (
               <div className="bg-aa-healthy/10 border border-aa-healthy/30 rounded-xl p-6 text-center">
                 <Icon name="check_circle" size={32} className="text-aa-healthy mx-auto mb-3" />
-                <p className="text-aa-text font-medium">You're on the list!</p>
-                <p className="text-aa-muted text-sm mt-1">We'll email you when your access is ready.</p>
+                <p className="text-aa-text font-medium">Thanks for signing up!</p>
+                <p className="text-aa-muted text-sm mt-1">Cameron will create your account and email you when it's ready.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
@@ -417,7 +417,8 @@ export default function Home() {
               {status === 'success' ? (
                 <div className="bg-aa-healthy/10 border border-aa-healthy/30 rounded-xl p-6 text-center">
                   <Icon name="check_circle" size={32} className="text-aa-healthy mx-auto mb-3" />
-                  <p className="text-aa-text font-medium">You're on the list!</p>
+                  <p className="text-aa-text font-medium">Thanks for signing up!</p>
+                  <p className="text-aa-muted text-sm mt-1">Cameron will create your account and email you when it's ready.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
