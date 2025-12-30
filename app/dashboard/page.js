@@ -110,7 +110,7 @@ function getStatusClasses(prediction) {
 }
 
 function getStatusLabel(prediction) {
-  if (!prediction) return 'No data'
+  if (!prediction) return 'Need More Data'
   const days = prediction.daysUntilOverage
   if (days <= 0) return 'Over limit'
   if (days <= 7) return 'Critical'
