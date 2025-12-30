@@ -45,7 +45,8 @@ export default function ThankYou() {
           </h1>
 
           <p className="text-xl text-aa-muted mb-8">
-            Cameron will set up your account and email you when it's ready.<br />
+            Cameron will set up your account<br />
+            and email you when it's ready.<br />
             Usually within 24 hours. Often much faster.
           </p>
 
