@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation'
+import { NextResponse } from 'next/server'
 import { neon } from '@neondatabase/serverless'
 
 const sql = neon(process.env.DATABASE_URL)
@@ -25,9 +25,10 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get('code')
   const error = searchParams.get('error')
+  const baseUrl = process.env.NEXTAUTH_URL
 
   if (error || !code) {
-    redirect('/signup?error=cancelled')
+    return NextResponse.redirect(`${baseUrl}/signup?error=cancelled`)
   }
 
   try {
@@ -39,7 +40,7 @@ export async function GET(request) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${process.env.NEXTAUTH_URL}/api/waitlist/callback`,
+        redirect_uri: `${baseUrl}/api/waitlist/callback`,
         grant_type: 'authorization_code',
       }),
     })
@@ -48,7 +49,7 @@ export async function GET(request) {
 
     if (!tokens.access_token) {
       console.error('Token exchange failed:', tokens)
-      redirect('/signup?error=auth_failed')
+      return NextResponse.redirect(`${baseUrl}/signup?error=auth_failed`)
     }
 
     // Get user info
@@ -59,7 +60,7 @@ export async function GET(request) {
     const user = await userRes.json()
 
     if (!user.email) {
-      redirect('/signup?error=no_email')
+      return NextResponse.redirect(`${baseUrl}/signup?error=no_email`)
     }
 
     // Add to waitlist
@@ -75,9 +76,9 @@ export async function GET(request) {
       await notifyPumble(user.email)
     }
 
-    redirect('/signup?success=true')
+    return NextResponse.redirect(`${baseUrl}/thank-you`)
   } catch (err) {
     console.error('Waitlist callback error:', err)
-    redirect('/signup?error=unknown')
+    return NextResponse.redirect(`${baseUrl}/signup?error=unknown`)
   }
 }
