@@ -58,38 +58,67 @@ const DEMO_DATA = {
     {
       id: 1,
       platform: 'zapier',
-      errorType: 'zap_error',
+      errorType: 'auth_failed',
+      severity: 'critical',
+      itemName: 'HubSpot (Sales CRM)',
+      errorMessage: 'Authentication failed - reconnection required',
+      emailDate: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 2,
+      platform: 'make',
+      errorType: 'connection_reauth',
+      severity: 'critical',
+      itemName: 'Google Sheets',
+      errorMessage: 'Connection authentication failed - reauthorization required',
+      emailDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 3,
+      platform: 'zapier',
+      errorType: 'zap_turned_off',
+      severity: 'critical',
       itemName: 'New Lead to CRM',
-      errorMessage: 'Connection to HubSpot failed: API rate limit exceeded',
+      errorMessage: 'Zap was automatically turned off due to errors',
       errorCount: 12,
       emailDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
-      id: 2,
+      id: 4,
       platform: 'airtable',
       errorType: 'automation_failure',
+      severity: 'critical',
       itemName: 'Send Weekly Report',
       errorMessage: 'Automation failed 8 times this week',
       errorCount: 8,
       emailDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
-      id: 3,
+      id: 5,
       platform: 'make',
-      errorType: 'scenario_failure',
+      errorType: 'scenario_deactivated',
+      severity: 'critical',
       itemName: 'Order Processing',
-      errorMessage: 'Scenario execution timeout after 40 seconds',
-      errorCount: 5,
+      errorMessage: 'Scenario was automatically stopped due to repeated errors',
+      emailDate: new Date(Date.now() - 2.5 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 6,
+      platform: 'bubble',
+      errorType: 'app_offline',
+      severity: 'critical',
+      itemName: 'Customer Portal',
+      errorMessage: 'App taken offline due to workload limit (overages disabled)',
       emailDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
-      id: 4,
-      platform: 'bubble',
-      errorType: 'capacity_exceeded',
-      itemName: 'Customer Portal',
-      errorMessage: 'App hit maximum capacity for 47 minutes',
-      capacityMinutes: 47,
-      emailDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      id: 7,
+      platform: 'zapier',
+      errorType: 'payment_failed',
+      severity: 'critical',
+      itemName: null,
+      errorMessage: 'Payment failed - service may be suspended',
+      emailDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     },
   ],
 }
@@ -344,20 +373,24 @@ export default function DemoPage() {
             <div className="space-y-4">
               {data.errors.map((error) => {
                 const platformInfo = PLATFORMS.find(p => p.id === error.platform)
+                const isCritical = error.severity === 'critical'
                 return (
-                  <div key={error.id} className="p-4 bg-aa-critical/5 rounded-lg border border-aa-critical/20">
+                  <div key={error.id} className={`p-4 rounded-lg border ${isCritical ? 'bg-aa-critical/5 border-aa-critical/20' : 'bg-aa-warning/5 border-aa-warning/20'}`}>
                     <div className="flex items-start justify-between mb-2">
-                      <div>
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-aa-text capitalize">{platformInfo?.name}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isCritical ? 'bg-aa-critical/20 text-aa-critical' : 'bg-aa-warning/20 text-aa-warning'}`}>
+                          {error.severity?.toUpperCase() || 'WARNING'}
+                        </span>
                         {error.itemName && (
-                          <span className="text-sm text-aa-muted ml-2">
+                          <span className="text-sm text-aa-muted">
                             {error.itemName}
                           </span>
                         )}
                       </div>
                       <span className="text-xs text-aa-muted">{formatDate(error.emailDate)}</span>
                     </div>
-                    <p className="text-sm text-aa-critical">{error.errorMessage}</p>
+                    <p className={`text-sm ${isCritical ? 'text-aa-critical' : 'text-aa-warning'}`}>{error.errorMessage}</p>
                     {error.errorCount > 3 && (
                       <div className="mt-2 flex items-center gap-2">
                         <Icon name="warning" size={14} className="text-aa-warning" />

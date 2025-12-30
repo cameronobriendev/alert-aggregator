@@ -20,13 +20,13 @@ See what's breaking in your no-code stack before your clients do. Monitor usage 
 | Airtable | noreply@airtable.com | 80%, 90%, 100% |
 | Bubble | via SendGrid | 75%, 100% |
 
-### Error Notifications
+### Error Notifications (with Severity)
 | Platform | Error Types |
 |----------|-------------|
-| Zapier | Zap failures, turned off, tasks held |
-| Make.com | Scenario failures, incomplete executions |
-| Airtable | Automation failures, API limits |
-| Bubble | Capacity exceeded, usage spikes |
+| Zapier | Auth failed (critical), App deprecation, Zap errors, Turned off (critical), Tasks held (critical), Payment failed |
+| Make.com | Connection reauth (critical), Scenario deactivated (critical), Scenario failures, Warnings, Payment failed, Extra ops limit |
+| Airtable | Payment failed (critical), API deprecation, Automation failures (critical), API limits, AI credit limit, Email limit |
+| Bubble | App offline (critical), Storage alert (critical), CPU alert (critical), Capacity exceeded (critical), Usage spikes, Email rate limit |
 
 ## Tech Stack
 
