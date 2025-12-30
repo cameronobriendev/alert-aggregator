@@ -35,9 +35,16 @@ export async function POST(request) {
 
     // Scan all platforms
     const emails = await gmail.scanAll()
+    console.log(`[SCAN] Found ${emails.length} emails`)
+
+    // Debug: log first few email subjects and from addresses
+    emails.slice(0, 5).forEach((e, i) => {
+      console.log(`[SCAN] Email ${i}: from="${e.from}", subject="${e.subject?.substring(0, 50)}"`)
+    })
 
     // Parse emails into alerts
     const parsedAlerts = parseEmails(emails)
+    console.log(`[SCAN] Parsed ${parsedAlerts.length} alerts from ${emails.length} emails`)
 
     // Save alerts to database
     const savedAlerts = []
@@ -90,6 +97,14 @@ export async function POST(request) {
       alertsFound: parsedAlerts.length,
       alertsSaved: savedAlerts.length,
       predictions,
+      // Debug info
+      debug: {
+        sampleEmails: emails.slice(0, 5).map(e => ({
+          from: e.from,
+          subject: e.subject?.substring(0, 60),
+        })),
+        parsedPlatforms: parsedAlerts.map(a => a.platform),
+      }
     })
   } catch (error) {
     console.error('Scan error:', error)
