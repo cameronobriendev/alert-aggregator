@@ -51,11 +51,11 @@ export default function Home() {
           className="text-center max-w-3xl mx-auto"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-aa-text mb-6">
-            Stop hitting limits you didn't see coming
+            See what's breaking before your clients do
           </h1>
           <p className="text-xl text-aa-muted mb-8">
-            Connect your Gmail. We'll find every usage alert from Zapier, Make.com, Airtable, and Bubble.
-            Then predict when you'll hit your next limit.
+            Connect your Gmail. We'll find every usage alert and error notification from Zapier, Make.com, Airtable, and Bubble.
+            See failed automations, predict overages, and know when it's time to go custom.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -94,12 +94,12 @@ export default function Home() {
           className="grid md:grid-cols-3 gap-6 mt-20"
         >
           <div className="glass-card rounded-xl p-6">
-            <div className="w-12 h-12 bg-aa-primary/10 rounded-lg flex items-center justify-center mb-4">
-              <Icon name="history" size={24} className="text-aa-primary" />
+            <div className="w-12 h-12 bg-aa-critical/10 rounded-lg flex items-center justify-center mb-4">
+              <Icon name="error" size={24} className="text-aa-critical" />
             </div>
-            <h3 className="text-lg font-semibold text-aa-text mb-2">Historical Analysis</h3>
+            <h3 className="text-lg font-semibold text-aa-text mb-2">Error Detection</h3>
             <p className="text-aa-muted">
-              We scan years of email history to understand your usage patterns across all platforms.
+              Failed zaps, broken automations, capacity issues. See every error across all your platforms in one place.
             </p>
           </div>
 
@@ -107,19 +107,19 @@ export default function Home() {
             <div className="w-12 h-12 bg-aa-warning/10 rounded-lg flex items-center justify-center mb-4">
               <Icon name="trending_up" size={24} className="text-aa-warning" />
             </div>
-            <h3 className="text-lg font-semibold text-aa-text mb-2">Predictive Alerts</h3>
+            <h3 className="text-lg font-semibold text-aa-text mb-2">Limit Predictions</h3>
             <p className="text-aa-muted">
-              Know exactly when you'll hit your limits. No more surprise overages or paused automations.
+              We analyze years of usage patterns to predict exactly when you'll hit your next overage.
             </p>
           </div>
 
           <div className="glass-card rounded-xl p-6">
-            <div className="w-12 h-12 bg-aa-healthy/10 rounded-lg flex items-center justify-center mb-4">
-              <Icon name="shield" size={24} className="text-aa-healthy" />
+            <div className="w-12 h-12 bg-aa-accent/10 rounded-lg flex items-center justify-center mb-4">
+              <Icon name="build" size={24} className="text-aa-accent" />
             </div>
-            <h3 className="text-lg font-semibold text-aa-text mb-2">Custom Solutions</h3>
+            <h3 className="text-lg font-semibold text-aa-text mb-2">Custom Build Offers</h3>
             <p className="text-aa-muted">
-              Outgrowing no-code? We'll show you what custom automation would save you.
+              When errors pile up or limits keep hitting, we'll show you what a custom solution would cost.
             </p>
           </div>
         </motion.div>

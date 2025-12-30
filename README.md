@@ -1,14 +1,32 @@
 # ClientFlow
 
-Monitor your no-code platform usage across Zapier, Make.com, Airtable, and Bubble. Predict overages before they happen.
+See what's breaking in your no-code stack before your clients do. Monitor usage limits AND errors across Zapier, Make.com, Airtable, and Bubble.
 
 ## Features
 
-- **Gmail Integration** - Connect your Gmail to scan for usage alert emails
-- **Multi-Platform Support** - Parses alerts from Zapier, Make.com, Airtable, and Bubble
-- **Predictive Analytics** - Velocity-based prediction of when you'll hit limits
-- **Adaptive Refresh** - Learns your login patterns and refreshes data before you arrive
-- **Dark/Light Theme** - Full theme support
+- **Error Detection** - Failed zaps, broken automations, capacity issues, API limits
+- **Limit Predictions** - Velocity-based prediction of when you'll hit overages
+- **Custom Build Offers** - When errors pile up, see what a custom solution would cost
+- **Gmail Integration** - Scans years of email history for alerts
+- **Adaptive Refresh** - Learns your login patterns, refreshes before you arrive
+
+## What We Track
+
+### Usage Alerts
+| Platform | Sender | Thresholds |
+|----------|--------|------------|
+| Zapier | contact@zapier.com | 80%, 100%, overage |
+| Make.com | *@make.com | 75%, 90%, 100% |
+| Airtable | noreply@airtable.com | 80%, 90%, 100% |
+| Bubble | via SendGrid | 75%, 100% |
+
+### Error Notifications
+| Platform | Error Types |
+|----------|-------------|
+| Zapier | Zap failures, turned off, tasks held |
+| Make.com | Scenario failures, incomplete executions |
+| Airtable | Automation failures, API limits |
+| Bubble | Capacity exceeded, usage spikes |
 
 ## Tech Stack
 
@@ -75,6 +93,7 @@ npm run dev
 ```
 clientflow.dev          → Landing page (sign in)
 app.clientflow.dev      → Dashboard (post-login)
+clientflow.dev/demo     → Demo with sample data
 
 /api/auth/[...nextauth] → Google OAuth
 /api/scan               → Trigger email scan
@@ -82,23 +101,20 @@ app.clientflow.dev      → Dashboard (post-login)
 /api/cron/scan          → Hourly background scan (Vercel Cron)
 ```
 
-## Email Parsing
-
-Parses usage alerts from:
-
-| Platform | Sender | Thresholds |
-|----------|--------|------------|
-| Zapier | contact@zapier.com | 80%, 100% |
-| Make.com | *@make.com | 75%, 90%, 100% |
-| Airtable | noreply@airtable.com | 80%, 90%, 100% |
-| Bubble | via SendGrid | 75%, 100% |
-
 ## Prediction Algorithm
 
 Uses velocity-based analysis:
 1. Calculate usage velocity from consecutive alerts (% per day)
 2. Project days until 100% based on average velocity
 3. Confidence rating based on data points (low/medium/high)
+
+## Custom Build Offers
+
+When we detect recurring errors or frequent limit hits, we surface "Outgrowing No-Code?" cards with:
+- The specific problem (based on their error patterns)
+- Risks of staying on no-code
+- Custom solution recommendation
+- CTA to book a consultation
 
 ## License
 
