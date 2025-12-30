@@ -157,6 +157,19 @@ export default function Dashboard() {
     }
   }, [status, fetchData])
 
+  // Auto-poll when waiting for background scan to complete
+  useEffect(() => {
+    if (status !== 'authenticated' || data?.hasScanned) return
+
+    // Poll every 5 seconds to check if background scan completed
+    const interval = setInterval(() => {
+      console.log('[DASHBOARD] Polling for scan completion...')
+      fetchData()
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [status, data?.hasScanned, fetchData])
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-aa-bg flex items-center justify-center">
@@ -264,14 +277,14 @@ export default function Dashboard() {
             className="text-center max-w-2xl mx-auto py-12"
           >
             <div className="w-20 h-20 bg-aa-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Icon name="email" size={40} className="text-aa-primary" />
+              <Icon name="sync" size={40} className="text-aa-primary animate-spin" />
             </div>
             <h1 className="text-3xl font-bold text-aa-text mb-4">
-              Ready to scan your emails
+              Scanning your emails...
             </h1>
             <p className="text-aa-muted mb-8">
-              We'll search your Gmail for usage alerts from Zapier, Make.com, Airtable, and Bubble
-              going back up to 3 years.
+              We're searching your Gmail for usage alerts from Zapier, Make.com, Airtable, and Bubble
+              going back up to 3 years. This runs automatically and may take a few minutes.
             </p>
 
             {error && (
@@ -280,27 +293,35 @@ export default function Dashboard() {
               </div>
             )}
 
-            <button
-              onClick={handleScan}
-              disabled={scanning}
-              className="bg-aa-primary text-white px-8 py-4 rounded-lg font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-3 mx-auto disabled:opacity-50"
-            >
-              {scanning ? (
-                <>
-                  <Icon name="sync" size={24} className="animate-spin" />
-                  {scanProgress || 'Scanning...'}
-                </>
-              ) : (
-                <>
-                  <Icon name="history" size={24} />
-                  Start Historical Scan
-                </>
-              )}
-            </button>
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center gap-2 text-aa-primary">
+                <div className="w-2 h-2 bg-aa-primary rounded-full animate-pulse" />
+                <span className="text-sm font-medium">Scan in progress</span>
+              </div>
 
-            <p className="text-sm text-aa-muted mt-6">
-              This may take a few minutes depending on your email volume.
-            </p>
+              <p className="text-xs text-aa-muted">
+                This page will update automatically when complete.
+              </p>
+
+              {/* Manual scan button as fallback */}
+              <button
+                onClick={handleScan}
+                disabled={scanning}
+                className="mt-4 text-sm text-aa-muted hover:text-aa-text transition-colors flex items-center gap-2"
+              >
+                {scanning ? (
+                  <>
+                    <Icon name="sync" size={16} className="animate-spin" />
+                    {scanProgress || 'Scanning...'}
+                  </>
+                ) : (
+                  <>
+                    <Icon name="refresh" size={16} />
+                    Scan not starting? Click here
+                  </>
+                )}
+              </button>
+            </div>
           </motion.div>
         ) : (
           <motion.div
