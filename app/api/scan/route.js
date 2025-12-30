@@ -46,14 +46,20 @@ export async function POST(request) {
     const parsedAlerts = parseEmails(emails)
     console.log(`[SCAN] Parsed ${parsedAlerts.length} alerts from ${emails.length} emails`)
 
-    // Save alerts to database
+    // Save alerts to database (both usage AND error alerts)
     const savedAlerts = []
     for (const alert of parsedAlerts) {
       try {
         const saved = await saveAlert({
           userId: user.id,
           platform: alert.platform,
+          type: alert.type || 'usage',
           threshold: alert.threshold,
+          alertType: alert.alertType,
+          errorType: alert.errorType,
+          severity: alert.severity,
+          itemName: alert.itemName,
+          errorMessage: alert.errorMessage,
           emailDate: alert.emailDate,
           emailSubject: alert.emailSubject,
           usageCurrent: alert.usageCurrent,
@@ -65,8 +71,7 @@ export async function POST(request) {
         })
         if (saved) savedAlerts.push(saved)
       } catch (err) {
-        // Duplicate email ID - skip
-        console.log('Skipping duplicate alert:', alert.rawEmailId)
+        console.log('Error saving alert:', err.message, alert.rawEmailId)
       }
     }
 
