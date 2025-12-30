@@ -115,7 +115,7 @@ export default function Home() {
               className="bg-aa-primary text-white px-8 py-4 rounded-xl font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-2 text-lg"
             >
               <Icon name="shield" size={24} />
-              Start Watching Free
+              Get Started Free
             </button>
             <button
               onClick={() => router.push('/demo')}
@@ -368,7 +368,7 @@ export default function Home() {
               className="bg-aa-primary text-white px-8 py-4 rounded-xl font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-2 text-lg mx-auto"
             >
               <Icon name="shield" size={24} />
-              Start Watching Free
+              Get Started Free
             </button>
 
             <p className="text-sm text-aa-muted mt-4">
