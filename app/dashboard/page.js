@@ -1,6 +1,6 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
+import { useSession, signOut, signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useEffect, useState, useCallback } from 'react'
@@ -65,12 +65,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/')
+      signIn('google')
     }
     if (status === 'authenticated') {
       fetchData()
     }
-  }, [status, router, fetchData])
+  }, [status, fetchData])
 
   if (status === 'loading') {
     return (
@@ -81,7 +81,11 @@ export default function Dashboard() {
   }
 
   if (!session) {
-    return null
+    return (
+      <div className="min-h-screen bg-aa-bg flex items-center justify-center">
+        <div className="text-aa-muted">Redirecting to sign in...</div>
+      </div>
+    )
   }
 
   const handleScan = async () => {
