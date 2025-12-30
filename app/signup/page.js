@@ -1,12 +1,13 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import ThemeToggle from '@/components/ThemeToggle'
 import Icon from '@/components/icons/Icon'
 
-export default function Signup() {
+function SignupContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const success = searchParams.get('success')
@@ -97,5 +98,13 @@ export default function Signup() {
         </motion.div>
       </main>
     </div>
+  )
+}
+
+export default function Signup() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-aa-bg" />}>
+      <SignupContent />
+    </Suspense>
   )
 }
