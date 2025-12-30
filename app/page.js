@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -61,30 +60,6 @@ const RELIEF_POINTS = [
 
 export default function Home() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState('idle') // idle, loading, success, error
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!email || !email.includes('@')) return
-
-    setStatus('loading')
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      })
-      if (res.ok) {
-        setStatus('success')
-        setEmail('')
-      } else {
-        setStatus('error')
-      }
-    } catch {
-      setStatus('error')
-    }
-  }
 
   return (
     <div className="min-h-screen bg-aa-bg">
@@ -100,13 +75,13 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <a
-              href="#join"
+            <button
+              onClick={() => router.push('/signup')}
               className="bg-aa-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-aa-primary/90 transition-colors flex items-center gap-2"
             >
-              <Icon name="email" size={20} />
-              Join Beta
-            </a>
+              <Icon name="login" size={20} />
+              Start Free
+            </button>
           </div>
         </div>
       </header>
@@ -134,39 +109,14 @@ export default function Home() {
             When something fails or a limit approaches, you'll know first.
           </p>
 
-          <div id="join" className="max-w-md mx-auto mb-8">
-            {status === 'success' ? (
-              <div className="bg-aa-healthy/10 border border-aa-healthy/30 rounded-xl p-6 text-center">
-                <Icon name="check_circle" size={32} className="text-aa-healthy mx-auto mb-3" />
-                <p className="text-aa-text font-medium">Thanks for signing up!</p>
-                <p className="text-aa-muted text-sm mt-1">Cameron will create your account and email you when it's ready.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-4 rounded-xl border border-aa-border bg-aa-card text-aa-text placeholder:text-aa-muted focus:outline-none focus:ring-2 focus:ring-aa-primary"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={status === 'loading'}
-                  className="bg-aa-primary text-white px-8 py-4 rounded-xl font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-2 text-lg disabled:opacity-50"
-                >
-                  <Icon name="shield" size={24} />
-                  {status === 'loading' ? 'Joining...' : 'Join Beta'}
-                </button>
-              </form>
-            )}
-            {status === 'error' && (
-              <p className="text-aa-critical text-sm mt-2 text-center">Something went wrong. Try again.</p>
-            )}
-          </div>
-
-          <div className="flex justify-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <button
+              onClick={() => router.push('/signup')}
+              className="bg-aa-primary text-white px-8 py-4 rounded-xl font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-2 text-lg"
+            >
+              <Icon name="shield" size={24} />
+              Start Watching Free
+            </button>
             <button
               onClick={() => router.push('/demo')}
               className="bg-aa-card border border-aa-border text-aa-text px-8 py-4 rounded-xl font-medium hover:bg-aa-border/30 transition-colors text-lg"
@@ -176,7 +126,7 @@ export default function Home() {
           </div>
 
           <p className="text-sm text-aa-muted">
-            Free during beta. We'll add you within 24 hours.
+            Connect Gmail in 30 seconds. We scan your existing alerts. No credit card.
           </p>
         </motion.section>
 
@@ -409,38 +359,17 @@ export default function Home() {
             </h2>
 
             <p className="text-lg text-aa-muted mb-8 max-w-xl mx-auto">
-              Join the beta. We'll add you within 24 hours.
-              Free during beta.
+              Connect your Gmail. See everything that's broken or about to break.
+              Takes 30 seconds. Free during beta.
             </p>
 
-            <div className="max-w-md mx-auto">
-              {status === 'success' ? (
-                <div className="bg-aa-healthy/10 border border-aa-healthy/30 rounded-xl p-6 text-center">
-                  <Icon name="check_circle" size={32} className="text-aa-healthy mx-auto mb-3" />
-                  <p className="text-aa-text font-medium">Thanks for signing up!</p>
-                  <p className="text-aa-muted text-sm mt-1">Cameron will create your account and email you when it's ready.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="flex-1 px-4 py-4 rounded-xl border border-aa-border bg-aa-card text-aa-text placeholder:text-aa-muted focus:outline-none focus:ring-2 focus:ring-aa-primary"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={status === 'loading'}
-                    className="bg-aa-primary text-white px-6 py-4 rounded-xl font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <Icon name="shield" size={24} />
-                    {status === 'loading' ? 'Joining...' : 'Join Beta'}
-                  </button>
-                </form>
-              )}
-            </div>
+            <button
+              onClick={() => router.push('/signup')}
+              className="bg-aa-primary text-white px-8 py-4 rounded-xl font-medium hover:bg-aa-primary/90 transition-colors flex items-center justify-center gap-2 text-lg mx-auto"
+            >
+              <Icon name="shield" size={24} />
+              Start Watching Free
+            </button>
 
             <p className="text-sm text-aa-muted mt-4">
               Read-only Gmail access. We never send emails or modify anything.
