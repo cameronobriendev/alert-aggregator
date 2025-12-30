@@ -146,7 +146,7 @@ export default function Dashboard() {
               <span className="text-sm text-aa-muted hidden sm:block">{session.user?.email}</span>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: 'https://clientflow.dev' })}
+              onClick={() => signOut({ callbackUrl: 'https://www.clientflow.dev' })}
               className="text-aa-muted hover:text-aa-text transition-colors flex items-center gap-1"
             >
               <Icon name="logout" size={20} />

@@ -81,6 +81,12 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
+            <a
+              href="https://app.clientflow.dev/dashboard"
+              className="text-aa-muted hover:text-aa-text transition-colors font-medium"
+            >
+              Sign In
+            </a>
             <button
               onClick={() => router.push('/signup')}
               className="bg-aa-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-aa-primary/90 transition-colors flex items-center gap-2"
