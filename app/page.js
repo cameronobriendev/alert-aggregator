@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -60,6 +61,11 @@ const RELIEF_POINTS = [
 
 export default function Home() {
   const router = useRouter()
+  const [checkedPains, setCheckedPains] = useState({})
+
+  const togglePain = (index) => {
+    setCheckedPains(prev => ({ ...prev, [index]: !prev[index] }))
+  }
 
   return (
     <div className="min-h-screen bg-aa-bg">
@@ -145,16 +151,29 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
             {PAIN_POINTS.map((point, i) => (
-              <motion.div
+              <motion.button
                 key={i}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.2 + i * 0.1 }}
-                className="flex items-start gap-3 p-4 bg-aa-card rounded-lg border border-aa-border"
+                onClick={() => togglePain(i)}
+                className={`flex items-start gap-3 p-4 rounded-lg border text-left transition-all ${
+                  checkedPains[i]
+                    ? 'bg-aa-healthy/10 border-aa-healthy/30'
+                    : 'bg-aa-card border-aa-border hover:border-aa-primary/30'
+                }`}
               >
-                <Icon name="check_box_outline_blank" size={20} className="text-aa-muted mt-0.5 flex-shrink-0" />
-                <span className="text-aa-text">{point}</span>
-              </motion.div>
+                <Icon
+                  name={checkedPains[i] ? 'check_circle' : 'check_box_outline_blank'}
+                  size={20}
+                  className={`mt-0.5 flex-shrink-0 transition-colors ${
+                    checkedPains[i] ? 'text-aa-healthy' : 'text-aa-muted'
+                  }`}
+                />
+                <span className={`transition-colors ${checkedPains[i] ? 'text-aa-text' : 'text-aa-text'}`}>
+                  {point}
+                </span>
+              </motion.button>
             ))}
           </div>
 
