@@ -269,7 +269,7 @@ export default function Home() {
                 It fails so often that I expect it to fail instead of trusting it."
               </blockquote>
               <p className="text-aa-muted">
-                — Real review from a business owner who needed something watching
+                Real review from a Zapier user on Trustpilot
               </p>
             </div>
           </div>
