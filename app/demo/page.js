@@ -242,8 +242,10 @@ export default function DemoPage() {
       <header className="border-b border-aa-border">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.svg" alt="ClientFlow" className="h-8 w-auto" />
-            <span className="text-xl font-semibold text-aa-text">ClientFlow</span>
+            <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <img src="/logo.svg" alt="ClientFlow" className="h-8 w-auto" />
+              <span className="text-xl font-semibold text-aa-text">ClientFlow</span>
+            </a>
             <span className="text-xs bg-aa-primary/20 text-aa-primary px-2 py-0.5 rounded-full font-medium">DEMO</span>
           </div>
           <div className="flex items-center gap-4">
