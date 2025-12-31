@@ -20,6 +20,19 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Parse request body for options (timeRange)
+    let timeRange = 'newer_than:1d' // Default to 24h for manual refresh (Vercel-safe)
+    try {
+      const body = await request.json()
+      if (body.timeRange) {
+        timeRange = body.timeRange
+      }
+    } catch {
+      // No body or invalid JSON, use default
+    }
+
+    console.log(`[SCAN] Manual refresh with timeRange: ${timeRange}`)
+
     // Get or create user in database
     const user = await getOrCreateUser(
       session.user.email,
@@ -33,8 +46,8 @@ export async function POST(request) {
     // Create Gmail client
     const gmail = createGmailClient(session.refreshToken)
 
-    // Scan all platforms
-    const emails = await gmail.scanAll()
+    // Scan all platforms with timeRange
+    const emails = await gmail.scanAll({ timeRange })
     console.log(`[SCAN] Found ${emails.length} emails`)
 
     // Debug: log first few email subjects and from addresses

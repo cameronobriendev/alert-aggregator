@@ -134,6 +134,29 @@ export default function Dashboard() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [scanProgress, setScanProgress] = useState('')
+  const [scanStatus, setScanStatus] = useState(null) // null, 'pending', 'scanning', 'complete', 'error'
+  const [scanDetails, setScanDetails] = useState({}) // emailsFound, alertsSaved, etc.
+
+  // Fetch scan status from DO worker
+  const fetchScanStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/scan/status')
+      if (res.ok) {
+        const json = await res.json()
+        setScanStatus(json.status)
+        setScanDetails({
+          emailsFound: json.emailsFound,
+          alertsSaved: json.alertsSaved,
+          startedAt: json.startedAt,
+          error: json.error,
+        })
+        return json.status
+      }
+    } catch (err) {
+      console.error('Failed to fetch scan status:', err)
+    }
+    return null
+  }, [])
 
   // Fetch existing data
   const fetchData = useCallback(async () => {
@@ -153,22 +176,29 @@ export default function Dashboard() {
       signIn('google')
     }
     if (status === 'authenticated') {
+      fetchScanStatus()
       fetchData()
     }
-  }, [status, fetchData])
+  }, [status, fetchData, fetchScanStatus])
 
-  // Auto-poll when waiting for background scan to complete
+  // Auto-poll when scan is pending or in progress
   useEffect(() => {
-    if (status !== 'authenticated' || data?.hasScanned) return
+    if (status !== 'authenticated') return
+    if (scanStatus === 'complete' || scanStatus === 'error') return
+    if (data?.hasScanned && scanStatus === null) return
 
-    // Poll every 5 seconds to check if background scan completed
-    const interval = setInterval(() => {
-      console.log('[DASHBOARD] Polling for scan completion...')
-      fetchData()
+    // Poll every 5 seconds to check scan progress
+    const interval = setInterval(async () => {
+      console.log('[DASHBOARD] Polling for scan status...')
+      const currentStatus = await fetchScanStatus()
+      if (currentStatus === 'complete') {
+        console.log('[DASHBOARD] Scan complete, fetching data')
+        await fetchData()
+      }
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [status, data?.hasScanned, fetchData])
+  }, [status, scanStatus, data?.hasScanned, fetchScanStatus, fetchData])
 
   if (status === 'loading') {
     return (
@@ -211,17 +241,25 @@ export default function Dashboard() {
 
   const handleRefresh = async () => {
     setScanning(true)
-    setScanProgress('Refreshing...')
+    setScanProgress('Checking last 24 hours...')
     try {
-      const res = await fetch('/api/scan', { method: 'POST' })
+      // Manual refresh only checks last 24 hours (fast, handled by Vercel)
+      const res = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timeRange: 'newer_than:1d' }),
+      })
       if (res.ok) {
         await fetchData()
+        setScanProgress('Done!')
       }
     } catch (err) {
       console.error('Refresh failed:', err)
     } finally {
-      setScanning(false)
-      setScanProgress('')
+      setTimeout(() => {
+        setScanning(false)
+        setScanProgress('')
+      }, 1000)
     }
   }
 
@@ -259,7 +297,7 @@ export default function Dashboard() {
               <span className="text-sm text-aa-muted hidden sm:block">{session.user?.email}</span>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: 'https://www.clientflow.dev' })}
+              onClick={() => signOut({ callbackUrl: '/signed-out' })}
               className="text-aa-muted hover:text-aa-text transition-colors flex items-center gap-1"
             >
               <Icon name="logout" size={20} />
@@ -270,7 +308,36 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {!hasScanned ? (
+        {/* Scan Status States */}
+        {scanStatus === 'error' ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center max-w-2xl mx-auto py-12"
+          >
+            <div className="w-20 h-20 bg-aa-critical/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Icon name="error" size={40} className="text-aa-critical" />
+            </div>
+            <h1 className="text-3xl font-bold text-aa-text mb-4">
+              Something went wrong
+            </h1>
+            <p className="text-aa-muted mb-4">
+              {scanDetails.error || 'We encountered an error while scanning your emails.'}
+            </p>
+            <p className="text-aa-muted mb-8">
+              Please try signing out and back in, or contact support at{' '}
+              <a href="mailto:cameron@cameronobrien.dev" className="text-aa-primary hover:underline">
+                cameron@cameronobrien.dev
+              </a>
+            </p>
+            <button
+              onClick={() => signOut({ callbackUrl: '/signed-out' })}
+              className="bg-aa-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-aa-primary/90 transition-colors"
+            >
+              Sign Out & Try Again
+            </button>
+          </motion.div>
+        ) : (scanStatus === 'pending' || scanStatus === 'scanning') && !hasScanned ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -280,11 +347,63 @@ export default function Dashboard() {
               <Icon name="sync" size={40} className="text-aa-primary animate-spin" />
             </div>
             <h1 className="text-3xl font-bold text-aa-text mb-4">
-              Scanning your emails...
+              {scanStatus === 'pending' ? 'Preparing your scan...' : 'Scanning your emails...'}
+            </h1>
+            <p className="text-aa-muted mb-6">
+              We're searching your Gmail for usage alerts from Zapier, Make.com, Airtable, and Bubble
+              from the last 3 months.
+            </p>
+
+            {/* Progress indicator */}
+            {scanDetails.emailsFound > 0 && (
+              <div className="mb-6 p-4 bg-aa-primary/10 border border-aa-primary/20 rounded-lg">
+                <p className="text-aa-primary font-medium">
+                  Found {scanDetails.emailsFound} platform emails
+                </p>
+                {scanDetails.alertsSaved > 0 && (
+                  <p className="text-aa-muted text-sm mt-1">
+                    Processed {scanDetails.alertsSaved} alerts so far
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="bg-aa-card border border-aa-border rounded-xl p-6 mb-8">
+              <Icon name="email" size={32} className="text-aa-accent mb-3 mx-auto" />
+              <h3 className="text-lg font-medium text-aa-text mb-2">
+                Almost done!
+              </h3>
+              <p className="text-aa-muted text-sm">
+                This usually takes 1-2 minutes.
+                <br />
+                <strong className="text-aa-text">We'll email you when it's ready.</strong>
+              </p>
+              <p className="text-xs text-aa-muted mt-4">
+                Feel free to close this tab and come back later.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-2 text-aa-primary">
+              <div className="w-2 h-2 bg-aa-primary rounded-full animate-pulse" />
+              <span className="text-sm font-medium">
+                {scanStatus === 'pending' ? 'Queued' : 'Scan in progress'}
+              </span>
+            </div>
+          </motion.div>
+        ) : !hasScanned ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center max-w-2xl mx-auto py-12"
+          >
+            <div className="w-20 h-20 bg-aa-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Icon name="sync" size={40} className="text-aa-primary animate-spin" />
+            </div>
+            <h1 className="text-3xl font-bold text-aa-text mb-4">
+              Setting up your dashboard...
             </h1>
             <p className="text-aa-muted mb-8">
-              We're searching your Gmail for usage alerts from Zapier, Make.com, Airtable, and Bubble
-              going back up to 3 years. This runs automatically and may take a few minutes.
+              Please wait while we prepare your account.
             </p>
 
             {error && (
@@ -293,35 +412,24 @@ export default function Dashboard() {
               </div>
             )}
 
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex items-center gap-2 text-aa-primary">
-                <div className="w-2 h-2 bg-aa-primary rounded-full animate-pulse" />
-                <span className="text-sm font-medium">Scan in progress</span>
-              </div>
-
-              <p className="text-xs text-aa-muted">
-                This page will update automatically when complete.
-              </p>
-
-              {/* Manual scan button as fallback */}
-              <button
-                onClick={handleScan}
-                disabled={scanning}
-                className="mt-4 text-sm text-aa-muted hover:text-aa-text transition-colors flex items-center gap-2"
-              >
-                {scanning ? (
-                  <>
-                    <Icon name="sync" size={16} className="animate-spin" />
-                    {scanProgress || 'Scanning...'}
-                  </>
-                ) : (
-                  <>
-                    <Icon name="refresh" size={16} />
-                    Scan not starting? Click here
-                  </>
-                )}
-              </button>
-            </div>
+            {/* Manual scan button as fallback */}
+            <button
+              onClick={handleScan}
+              disabled={scanning}
+              className="mt-4 text-sm text-aa-muted hover:text-aa-text transition-colors flex items-center gap-2"
+            >
+              {scanning ? (
+                <>
+                  <Icon name="sync" size={16} className="animate-spin" />
+                  {scanProgress || 'Scanning...'}
+                </>
+              ) : (
+                <>
+                  <Icon name="refresh" size={16} />
+                  Scan not starting? Click here
+                </>
+              )}
+            </button>
           </motion.div>
         ) : (
           <motion.div
@@ -516,10 +624,8 @@ export default function Dashboard() {
                     if (!offer) return null
 
                     return (
-                      <motion.div
+                      <div
                         key={platformId}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
                         className="glass-card rounded-xl p-6 border-t-4 border-aa-accent"
                       >
                         <div className="flex items-center gap-2 mb-3">
@@ -557,14 +663,14 @@ export default function Dashboard() {
                         </ul>
 
                         <a
-                          href="https://cal.cameronobrien.dev"
+                          href="https://cal.cameronobrien.dev/free"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block w-full text-center bg-aa-accent text-white py-2 px-4 rounded-lg font-medium hover:bg-aa-accent/90 transition-colors text-sm"
+                          className="block w-full text-center bg-aa-accent text-white dark:text-black py-2 px-4 rounded-lg font-medium hover:bg-aa-accent/90 transition-colors text-sm"
                         >
                           Get a Custom Build Quote
                         </a>
-                      </motion.div>
+                      </div>
                     )
                   })}
                 </div>
