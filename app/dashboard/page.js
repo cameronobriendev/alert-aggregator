@@ -626,7 +626,7 @@ export default function Dashboard() {
                     return (
                       <div
                         key={platformId}
-                        className="glass-card rounded-xl p-6 border-t-4 border-aa-accent"
+                        className="bg-aa-card rounded-xl p-6 border border-aa-border border-t-4 border-t-aa-accent shadow-sm"
                       >
                         <div className="flex items-center gap-2 mb-3">
                           <span className="text-sm font-medium text-aa-primary px-2 py-0.5 bg-aa-primary/10 rounded">
