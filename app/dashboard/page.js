@@ -515,7 +515,7 @@ export default function Dashboard() {
                     ) : latestAlert ? (
                       <div className="space-y-2">
                         <div className="text-sm text-aa-text">
-                          {latestAlert.summary || (latestAlert.threshold ? `Last alert: ${latestAlert.threshold}%` : 'Recent activity')}
+                          {latestAlert.summary || (latestAlert.threshold ? `${latestAlert.threshold}% of limit` : 'Recent activity')}
                         </div>
                         <div className="text-xs text-aa-muted">
                           {formatDate(latestAlert.emailDate)}
@@ -692,7 +692,7 @@ export default function Dashboard() {
                           {alert.platform}
                         </span>
                         <span className="text-sm text-aa-text truncate">
-                          {alert.summary || (alert.threshold ? `${alert.threshold}% usage` : alert.emailSubject?.substring(0, 50) || 'Alert')}
+                          {alert.summary || (alert.threshold ? `${alert.threshold}% of limit` : alert.emailSubject?.substring(0, 50) || 'Alert')}
                         </span>
                       </div>
                       <div className="text-xs text-aa-muted flex-shrink-0 ml-4">

@@ -507,7 +507,7 @@ export default function DemoPage() {
                 <div key={alert.id} className="flex items-center justify-between py-2 border-b border-aa-border last:border-0">
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-aa-text capitalize">{alert.platform}</span>
-                    <span className="text-xs bg-aa-border px-2 py-0.5 rounded">{alert.threshold}%</span>
+                    <span className="text-xs bg-aa-border px-2 py-0.5 rounded">{alert.threshold}% of limit</span>
                   </div>
                   <div className="text-xs text-aa-muted">
                     {formatDate(alert.emailDate)}
