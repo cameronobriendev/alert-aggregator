@@ -44,14 +44,10 @@ const DEMO_DATA = {
     },
   },
   alerts: [
-    { id: 1, platform: 'bubble', threshold: 90, emailDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: 1, platform: 'bubble', threshold: 92, emailDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
     { id: 2, platform: 'zapier', threshold: 85, emailDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 3, platform: 'make', threshold: 75, emailDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 4, platform: 'zapier', threshold: 75, emailDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 5, platform: 'bubble', threshold: 75, emailDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 6, platform: 'airtable', threshold: 50, emailDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 7, platform: 'make', threshold: 50, emailDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 8, platform: 'zapier', threshold: 50, emailDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: 3, platform: 'make', threshold: 72, emailDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: 4, platform: 'airtable', threshold: 45, emailDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
   ],
   // Error notifications from platforms
   errors: [
