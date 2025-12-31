@@ -455,84 +455,103 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Platform status cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {PLATFORMS.map((platform) => {
+            {/* Platform status cards - only show platforms with data */}
+            {(() => {
+              const platformsWithData = PLATFORMS.filter((platform) => {
                 const prediction = data?.predictions?.[platform.id]
                 const latestAlert = data?.latestAlerts?.[platform.id]
-                const statusClasses = getStatusClasses(prediction)
-                const statusLabel = getStatusLabel(prediction)
+                return prediction || latestAlert
+              })
 
+              if (platformsWithData.length === 0) {
                 return (
-                  <motion.div
-                    key={platform.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`glass-card rounded-xl p-6 ${prediction?.daysUntilOverage <= 7 ? 'health-glow-critical' : prediction?.daysUntilOverage <= 14 ? 'health-glow-warning' : ''}`}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-medium text-aa-text">{platform.name}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusClasses.bgLight} ${statusClasses.text}`}>
-                        {statusLabel}
-                      </span>
-                    </div>
-
-                    {prediction ? (
-                      <div className="space-y-3">
-                        {/* Progress bar */}
-                        <div className="h-2 bg-aa-border rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${statusClasses.bg} progress-animate`}
-                            style={{ width: `${Math.min(prediction.lastThreshold || 50, 100)}%` }}
-                          />
-                        </div>
-
-                        {/* Prediction */}
-                        <div className="text-sm">
-                          {prediction.daysUntilOverage <= 0 ? (
-                            <span className="text-aa-critical font-medium">Over limit!</span>
-                          ) : (
-                            <>
-                              <span className="text-aa-muted">Limit in </span>
-                              <span className={`font-medium ${statusClasses.text}`}>
-                                {prediction.daysUntilOverage} days
-                              </span>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Predicted date */}
-                        <div className="text-xs text-aa-muted">
-                          {formatDate(prediction.predictedOverageDate)}
-                        </div>
-
-                        {/* Confidence indicator */}
-                        <div className="flex items-center gap-1 text-xs text-aa-muted">
-                          <Icon name="info" size={12} />
-                          {prediction.confidence} confidence ({prediction.dataPoints} data points)
-                        </div>
-                      </div>
-                    ) : latestAlert ? (
-                      <div className="space-y-2">
-                        <div className="text-sm text-aa-text">
-                          {latestAlert.summary || (latestAlert.threshold ? `${latestAlert.threshold}% of limit` : 'Recent activity')}
-                        </div>
-                        <div className="text-xs text-aa-muted">
-                          {formatDate(latestAlert.emailDate)}
-                        </div>
-                        <div className="text-xs text-aa-muted">
-                          Need more data for predictions
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-aa-muted text-sm">
-                        No usage alerts found for {platform.name}
-                      </div>
-                    )}
-                  </motion.div>
+                  <div className="glass-card rounded-xl p-8 text-center mb-8">
+                    <Icon name="inbox" size={48} className="text-aa-muted mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-aa-text mb-2">No platform emails found</h3>
+                    <p className="text-aa-muted">
+                      We didn't find any usage alerts from Zapier, Make.com, Airtable, or Bubble in your email.
+                      This could mean you're not using these platforms, or their emails go to a different inbox.
+                    </p>
+                  </div>
                 )
-              })}
-            </div>
+              }
+
+              return (
+                <div className={`grid gap-4 mb-8 ${platformsWithData.length === 1 ? 'md:grid-cols-1 max-w-md' : platformsWithData.length === 2 ? 'md:grid-cols-2' : platformsWithData.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 lg:grid-cols-4'}`}>
+                  {platformsWithData.map((platform) => {
+                    const prediction = data?.predictions?.[platform.id]
+                    const latestAlert = data?.latestAlerts?.[platform.id]
+                    const statusClasses = getStatusClasses(prediction)
+                    const statusLabel = getStatusLabel(prediction)
+
+                    return (
+                      <motion.div
+                        key={platform.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={`glass-card rounded-xl p-6 ${prediction?.daysUntilOverage <= 7 ? 'health-glow-critical' : prediction?.daysUntilOverage <= 14 ? 'health-glow-warning' : ''}`}
+                      >
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="font-medium text-aa-text">{platform.name}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusClasses.bgLight} ${statusClasses.text}`}>
+                            {statusLabel}
+                          </span>
+                        </div>
+
+                        {prediction ? (
+                          <div className="space-y-3">
+                            {/* Progress bar */}
+                            <div className="h-2 bg-aa-border rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${statusClasses.bg} progress-animate`}
+                                style={{ width: `${Math.min(prediction.lastThreshold || 50, 100)}%` }}
+                              />
+                            </div>
+
+                            {/* Prediction */}
+                            <div className="text-sm">
+                              {prediction.daysUntilOverage <= 0 ? (
+                                <span className="text-aa-critical font-medium">Over limit!</span>
+                              ) : (
+                                <>
+                                  <span className="text-aa-muted">Limit in </span>
+                                  <span className={`font-medium ${statusClasses.text}`}>
+                                    {prediction.daysUntilOverage} days
+                                  </span>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Predicted date */}
+                            <div className="text-xs text-aa-muted">
+                              {formatDate(prediction.predictedOverageDate)}
+                            </div>
+
+                            {/* Confidence indicator */}
+                            <div className="flex items-center gap-1 text-xs text-aa-muted">
+                              <Icon name="info" size={12} />
+                              {prediction.confidence} confidence ({prediction.dataPoints} data points)
+                            </div>
+                          </div>
+                        ) : latestAlert ? (
+                          <div className="space-y-2">
+                            <div className="text-sm text-aa-text">
+                              {latestAlert.summary || (latestAlert.threshold ? `${latestAlert.threshold}% of limit` : 'Recent activity')}
+                            </div>
+                            <div className="text-xs text-aa-muted">
+                              {formatDate(latestAlert.emailDate)}
+                            </div>
+                            <div className="text-xs text-aa-muted">
+                              Need more data for predictions
+                            </div>
+                          </div>
+                        ) : null}
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
 
             {/* Predictions summary */}
             {Object.keys(data?.predictions || {}).length > 0 && (
