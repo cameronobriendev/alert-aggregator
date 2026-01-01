@@ -460,7 +460,8 @@ export default function Dashboard() {
               const platformsWithData = PLATFORMS.filter((platform) => {
                 const prediction = data?.predictions?.[platform.id]
                 const latestAlert = data?.latestAlerts?.[platform.id]
-                return prediction || latestAlert
+                const hasErrors = data?.errors?.some(e => e.platform === platform.id)
+                return prediction || latestAlert || hasErrors
               })
 
               if (platformsWithData.length === 0) {
@@ -481,19 +482,27 @@ export default function Dashboard() {
                   {platformsWithData.map((platform) => {
                     const prediction = data?.predictions?.[platform.id]
                     const latestAlert = data?.latestAlerts?.[platform.id]
+                    const platformErrors = data?.errors?.filter(e => e.platform === platform.id) || []
                     const statusClasses = getStatusClasses(prediction)
-                    const statusLabel = getStatusLabel(prediction)
+
+                    // Determine status label
+                    let statusLabel = getStatusLabel(prediction)
+                    let badgeClasses = `${statusClasses.bgLight} ${statusClasses.text}`
+                    if (!prediction && !latestAlert && platformErrors.length > 0) {
+                      statusLabel = `${platformErrors.length} Error${platformErrors.length > 1 ? 's' : ''}`
+                      badgeClasses = 'bg-aa-critical/20 text-aa-critical'
+                    }
 
                     return (
                       <motion.div
                         key={platform.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`glass-card rounded-xl p-6 ${prediction?.daysUntilOverage <= 7 ? 'health-glow-critical' : prediction?.daysUntilOverage <= 14 ? 'health-glow-warning' : ''}`}
+                        className={`glass-card rounded-xl p-6 ${prediction?.daysUntilOverage <= 7 ? 'health-glow-critical' : prediction?.daysUntilOverage <= 14 ? 'health-glow-warning' : platformErrors.length > 0 && !prediction ? 'health-glow-critical' : ''}`}
                       >
                         <div className="flex items-center justify-between mb-4">
                           <span className="font-medium text-aa-text">{platform.name}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusClasses.bgLight} ${statusClasses.text}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeClasses}`}>
                             {statusLabel}
                           </span>
                         </div>
@@ -543,6 +552,18 @@ export default function Dashboard() {
                             </div>
                             <div className="text-xs text-aa-muted">
                               Need more data for predictions
+                            </div>
+                          </div>
+                        ) : platformErrors.length > 0 ? (
+                          <div className="space-y-2">
+                            <div className="text-sm text-aa-critical">
+                              {platformErrors[0].summary || platformErrors[0].errorMessage || 'Recent errors detected'}
+                            </div>
+                            <div className="text-xs text-aa-muted">
+                              {formatDate(platformErrors[0].emailDate)}
+                            </div>
+                            <div className="text-xs text-aa-muted">
+                              No usage data yet
                             </div>
                           </div>
                         ) : null}
