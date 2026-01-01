@@ -3,12 +3,30 @@
 import { useSession, signOut, signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import ThemeToggle from '@/components/ThemeToggle'
 import Icon from '@/components/icons/Icon'
 import BetaToast from '@/components/BetaToast'
 
 const ADMIN_EMAIL = 'cameronobriendev@gmail.com'
+
+// Loading fallback for Suspense
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen bg-aa-bg flex items-center justify-center">
+      <div className="text-aa-muted">Loading...</div>
+    </div>
+  )
+}
+
+// Wrapper component to handle Suspense requirement for useSearchParams
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
+  )
+}
 
 const PLATFORMS = [
   { id: 'zapier', name: 'Zapier', metric: 'tasks' },
@@ -129,7 +147,7 @@ function formatDate(dateString) {
   })
 }
 
-export default function Dashboard() {
+function DashboardContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
