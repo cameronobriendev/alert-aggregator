@@ -1,12 +1,14 @@
 'use client'
 
 import { useSession, signOut, signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useEffect, useState, useCallback } from 'react'
 import ThemeToggle from '@/components/ThemeToggle'
 import Icon from '@/components/icons/Icon'
 import BetaToast from '@/components/BetaToast'
+
+const ADMIN_EMAIL = 'cameronobriendev@gmail.com'
 
 const PLATFORMS = [
   { id: 'zapier', name: 'Zapier', metric: 'tasks' },
@@ -130,15 +132,22 @@ function formatDate(dateString) {
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [scanning, setScanning] = useState(false)
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [scanProgress, setScanProgress] = useState('')
   const [scanStatus, setScanStatus] = useState(null) // null, 'pending', 'scanning', 'complete', 'error'
   const [scanDetails, setScanDetails] = useState({}) // emailsFound, alertsSaved, etc.
+  const [impersonating, setImpersonating] = useState(null) // { email, name } if impersonating
 
-  // Fetch scan status from DO worker
+  // Check for impersonation mode
+  const impersonateEmail = searchParams.get('as')
+  const isAdmin = session?.user?.email === ADMIN_EMAIL
+
+  // Fetch scan status from DO worker (disabled in impersonation mode)
   const fetchScanStatus = useCallback(async () => {
+    if (impersonateEmail && isAdmin) return null // Skip in impersonation mode
     try {
       const res = await fetch('/api/scan/status')
       if (res.ok) {
@@ -156,30 +165,46 @@ export default function Dashboard() {
       console.error('Failed to fetch scan status:', err)
     }
     return null
-  }, [])
+  }, [impersonateEmail, isAdmin])
 
-  // Fetch existing data
+  // Fetch existing data (or impersonated user data if admin)
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch('/api/alerts')
-      if (res.ok) {
-        const json = await res.json()
-        setData(json)
+      let res
+      if (impersonateEmail && isAdmin) {
+        // Admin impersonation mode
+        res = await fetch(`/api/admin/impersonate?email=${encodeURIComponent(impersonateEmail)}`)
+        if (res.ok) {
+          const json = await res.json()
+          setData(json)
+          setImpersonating(json.targetUser)
+          // Set scan status from target user
+          setScanStatus(json.targetUser?.scanStatus || 'complete')
+        }
+      } else {
+        // Normal mode
+        res = await fetch('/api/alerts')
+        if (res.ok) {
+          const json = await res.json()
+          setData(json)
+        }
       }
     } catch (err) {
       console.error('Failed to fetch alerts:', err)
     }
-  }, [])
+  }, [impersonateEmail, isAdmin])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       signIn('google')
     }
     if (status === 'authenticated') {
-      fetchScanStatus()
+      if (!(impersonateEmail && isAdmin)) {
+        fetchScanStatus()
+      }
       fetchData()
     }
-  }, [status, fetchData, fetchScanStatus])
+  }, [status, fetchData, fetchScanStatus, impersonateEmail, isAdmin])
 
   // Auto-poll when scan is pending or in progress
   useEffect(() => {
@@ -272,6 +297,25 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-aa-bg">
+      {/* Impersonation Banner */}
+      {impersonating && (
+        <div className="bg-aa-critical text-white py-2 px-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Icon name="visibility" size={18} />
+              <span className="font-medium">Admin View:</span>
+              <span>Viewing as {impersonating.name || impersonating.email}</span>
+            </div>
+            <a
+              href="/admin"
+              className="text-white/80 hover:text-white underline text-sm"
+            >
+              Back to Admin
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-aa-border">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -281,6 +325,14 @@ export default function Dashboard() {
             <span className="text-xs bg-aa-primary/20 text-aa-primary px-2 py-0.5 rounded-full font-medium">FREE BETA</span>
           </div>
           <div className="flex items-center gap-4">
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="text-aa-critical hover:text-aa-critical/80 transition-colors font-medium"
+              >
+                Admin
+              </a>
+            )}
             <a
               href="/help"
               className="text-aa-muted hover:text-aa-text transition-colors font-medium"
@@ -445,14 +497,16 @@ export default function Dashboard() {
                   </p>
                 )}
               </div>
-              <button
-                onClick={handleRefresh}
-                disabled={scanning}
-                className="flex items-center gap-2 text-aa-primary hover:text-aa-primary/80 transition-colors disabled:opacity-50"
-              >
-                <Icon name="refresh" size={20} className={scanning ? 'animate-spin' : ''} />
-                Refresh
-              </button>
+              {!impersonating && (
+                <button
+                  onClick={handleRefresh}
+                  disabled={scanning}
+                  className="flex items-center gap-2 text-aa-primary hover:text-aa-primary/80 transition-colors disabled:opacity-50"
+                >
+                  <Icon name="refresh" size={20} className={scanning ? 'animate-spin' : ''} />
+                  Refresh
+                </button>
+              )}
             </div>
 
             {/* Platform status cards - only show platforms with data */}
