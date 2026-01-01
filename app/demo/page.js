@@ -483,12 +483,10 @@ export default function DemoPage() {
                     </ul>
 
                     <a
-                      href="https://cal.cameronobrien.dev/free"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href="/help"
                       className="block w-full text-center bg-aa-accent text-black py-2 px-4 rounded-lg font-medium hover:bg-aa-accent/90 transition-colors text-sm"
                     >
-                      Get a Custom Build Quote
+                      Get Help
                     </a>
                   </div>
                 )

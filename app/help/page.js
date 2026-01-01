@@ -45,7 +45,7 @@ export default function Help() {
             I'll fix issues within 24 hours. Your voice matters!
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <a
               href="https://linkedin.com/in/cameronobriendev"
               target="_blank"
@@ -63,6 +63,28 @@ export default function Help() {
             >
               <Icon name="email" size={20} />
               Email
+            </a>
+          </div>
+
+          {/* Outgrowing no-code section */}
+          <div className="border-t border-aa-border pt-10 mb-10">
+            <div className="w-14 h-14 bg-aa-accent/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Icon name="build" size={28} className="text-aa-accent" />
+            </div>
+            <h2 className="text-xl font-bold text-aa-text mb-3">
+              Outgrowing your no-code tools?
+            </h2>
+            <p className="text-aa-muted mb-6 leading-relaxed">
+              If you're hitting limits, dealing with constant errors, or feeling like your platforms can't keep up with your business, I'd be happy to chat and make a recommendation.
+            </p>
+            <a
+              href="https://cal.cameronobrien.dev/free"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-aa-accent text-black px-6 py-3 rounded-xl font-medium hover:bg-aa-accent/90 transition-colors"
+            >
+              <Icon name="calendar_today" size={20} />
+              Book a Free Call
             </a>
           </div>
 
